@@ -1,0 +1,456 @@
+type vm =
+  {
+  vM_uuid: string ;
+  vM_name_label: string ;
+  vM_VBDs: vbd Rpc.Types.ref list ;
+  vM_other_config: (string * string) list }
+and vbd = {
+  vBD_VM: vm Rpc.Types.ref }
+and db = {
+  vms: vm Refmap.t ;
+  vbds: vbd Refmap.t }[@@deriving rpcty]
+let _ = fun (_ : vm) -> ()
+let _ = fun (_ : vbd) -> ()
+let _ = fun (_ : db) -> ()
+type _ Rpc.Types.cls +=  
+  | VM: vm Rpc.Types.cls 
+type _ Rpc.Types.cls +=  
+  | VBD: vbd Rpc.Types.cls 
+type _ Rpc.Types.cls +=  
+  | DB: db Rpc.Types.cls 
+let rec (vm_vM_uuid : (_, vm) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vM_uuid"];
+      field = (let open! Rpc.Types in Basic String);
+      fcls = VM;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vM_uuid);
+      fset = (fun v -> fun _s -> { _s with vM_uuid = v })
+    }
+and (vm_vM_name_label : (_, vm) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vM_name_label"];
+      field = (let open! Rpc.Types in Basic String);
+      fcls = VM;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vM_name_label);
+      fset = (fun v -> fun _s -> { _s with vM_name_label = v })
+    }
+and (vm_vM_VBDs : (_, vm) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vM_VBDs"];
+      field =
+        (let open! Rpc.Types in
+           List (let open! Rpc.Types in Refv (VBD, typ_of_vbd)));
+      fcls = VM;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vM_VBDs);
+      fset = (fun v -> fun _s -> { _s with vM_VBDs = v })
+    }
+and (vm_vM_other_config : (_, vm) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vM_other_config"];
+      field =
+        (let open! Rpc.Types in
+           Dict (String, (let open! Rpc.Types in Basic String)));
+      fcls = VM;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vM_other_config);
+      fset = (fun v -> fun _s -> { _s with vM_other_config = v })
+    }
+and typ_of_vm =
+  let open! Rpc.Types in
+    Struct
+      ({
+         fields =
+           [BoxedField vm_vM_uuid;
+           BoxedField vm_vM_name_label;
+           BoxedField vm_vM_VBDs;
+           BoxedField vm_vM_other_config];
+         sname = "vm";
+         version = None;
+         constructor =
+           (fun getter ->
+              let open Rresult.R in
+                (getter.Rpc.Types.field_get "vM_other_config"
+                   (let open! Rpc.Types in
+                      Dict (String, (let open! Rpc.Types in Basic String))))
+                  >>=
+                  (fun vm_vM_other_config ->
+                     (getter.Rpc.Types.field_get "vM_VBDs"
+                        (let open! Rpc.Types in
+                           List
+                             (let open! Rpc.Types in Refv (VBD, typ_of_vbd))))
+                       >>=
+                       (fun vm_vM_VBDs ->
+                          (getter.Rpc.Types.field_get "vM_name_label"
+                             (let open! Rpc.Types in Basic String))
+                            >>=
+                            (fun vm_vM_name_label ->
+                               (getter.Rpc.Types.field_get "vM_uuid"
+                                  (let open! Rpc.Types in Basic String))
+                                 >>=
+                                 (fun vm_vM_uuid ->
+                                    return
+                                      {
+                                        vM_uuid = vm_vM_uuid;
+                                        vM_name_label = vm_vM_name_label;
+                                        vM_VBDs = vm_vM_VBDs;
+                                        vM_other_config = vm_vM_other_config
+                                      })))))
+       } : vm Rpc.Types.structure)
+and vm =
+  let open! Rpc.Types in { name = "vm"; description = []; ty = typ_of_vm }
+and (vbd_vBD_VM : (_, vbd) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vBD_VM"];
+      field = (let open! Rpc.Types in Refv (VM, typ_of_vm));
+      fcls = VBD;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vBD_VM);
+      fset = (fun v -> fun _s -> { vBD_VM = v })
+    }
+and typ_of_vbd =
+  let open! Rpc.Types in
+    Struct
+      ({
+         fields = [BoxedField vbd_vBD_VM];
+         sname = "vbd";
+         version = None;
+         constructor =
+           (fun getter ->
+              let open Rresult.R in
+                (getter.Rpc.Types.field_get "vBD_VM"
+                   (let open! Rpc.Types in Refv (VM, typ_of_vm)))
+                  >>= (fun vbd_vBD_VM -> return { vBD_VM = vbd_vBD_VM }))
+       } : vbd Rpc.Types.structure)
+and vbd =
+  let open! Rpc.Types in { name = "vbd"; description = []; ty = typ_of_vbd }
+and (db_vms : (_, db) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vms"];
+      field = (let open! Rpc.Types in Refmap typ_of_vm);
+      fcls = DB;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vms);
+      fset = (fun v -> fun _s -> { _s with vms = v })
+    }
+and (db_vbds : (_, db) Rpc.Types.field) =
+  let open Rpc.Types in
+    {
+      fname = ["vbds"];
+      field = (let open! Rpc.Types in Refmap typ_of_vbd);
+      fcls = DB;
+      fdefault = None;
+      fdescription = [];
+      fversion = None;
+      fget = (fun _r -> _r.vbds);
+      fset = (fun v -> fun _s -> { _s with vbds = v })
+    }
+and typ_of_db =
+  let open! Rpc.Types in
+    Struct
+      ({
+         fields = [BoxedField db_vms; BoxedField db_vbds];
+         sname = "db";
+         version = None;
+         constructor =
+           (fun getter ->
+              let open Rresult.R in
+                (getter.Rpc.Types.field_get "vbds"
+                   (let open! Rpc.Types in Refmap typ_of_vbd))
+                  >>=
+                  (fun db_vbds ->
+                     (getter.Rpc.Types.field_get "vms"
+                        (let open! Rpc.Types in Refmap typ_of_vm))
+                       >>=
+                       (fun db_vms -> return { vms = db_vms; vbds = db_vbds })))
+       } : db Rpc.Types.structure)
+and db =
+  let open! Rpc.Types in { name = "db"; description = []; ty = typ_of_db }
+let _ = vm_vM_uuid
+and _ = vm_vM_name_label
+and _ = vm_vM_VBDs
+and _ = vm_vM_other_config
+and _ = typ_of_vm
+and _ = vm
+and _ = vbd_vBD_VM
+and _ = typ_of_vbd
+and _ = vbd
+and _ = db_vms
+and _ = db_vbds
+and _ = typ_of_db
+and _ = db
+module VM =
+  struct
+    let uuid = vm_vM_uuid
+    let name_label = vm_vM_name_label
+    let vBDs = vm_vM_VBDs
+    let other_config = vm_vM_other_config
+    let vm = typ_of_vm
+    let vm_make_ref x = Rpc.Types.make_ref VM typ_of_vm x
+    let empty =
+      { vM_uuid = ""; vM_name_label = ""; vM_VBDs = []; vM_other_config = []
+      }
+  end
+module VBD =
+  struct
+    let vM = vbd_vBD_VM
+    let vbd = typ_of_vbd
+    let vbd_make_ref x = Rpc.Types.make_ref VBD typ_of_vbd x
+    let empty = { vBD_VM = (NullRef VM) }
+  end
+type ('a, 'b) otm_pair =
+  (('b Rpc.Types.ref, 'a) Rpc.Types.field * ('a Rpc.Types.ref list, 'b)
+    Rpc.Types.field)
+and relation =
+  | Rel: ('a, 'b) otm_pair -> relation 
+let vbd_vm : (vbd, vm) otm_pair = (VBD.vM, VM.vBDs)
+let rels = [Rel vbd_vm]
+module DB =
+  struct
+    let vms = db_vms
+    let vbds = db_vbds
+    let empty = { vms = Refmap.empty; vbds = Refmap.empty }
+    let find_objs : type a.
+      a Rpc.Types.cls -> (a Refmap.t, db) Rpc.Types.field =
+      function | VM -> vms | VBD -> vbds | _ -> failwith "Invalid type"
+    let db = db
+  end
+let mkref : type a. a Rpc.Types.cls -> string -> a Rpc.Types.ref =
+  fun cls ->
+    fun v ->
+      match cls with
+      | VM -> Rpc.Types.make_ref VM VM.vm v
+      | VBD -> Rpc.Types.make_ref VBD VBD.vbd v
+      | _ -> failwith "Unknown reference type"
+let maindb = ref (0L, DB.empty, Stat.StatTree.empty)
+let getdb () = let (_, db, _) = !maindb in db
+let operate
+  : 'a Rpc.Types.ref ->
+      (('a Refmap.t, db) Rpc.Types.field ->
+         ('a option, 'a Refmap.t) Rpc.Types.field -> 'b)
+        -> 'b
+  =
+  fun ref ->
+    fun f ->
+      let cls = Rpc.Types.cls_of_ref ref in
+      let f' = DB.find_objs cls in
+      match ref with
+      | Rpc.Types.Ref f'' -> f f' f''
+      | Rpc.Types.NullRef _ -> failwith "Null reference"
+let fld_update : ('a, db) Rpc.Types.field -> ('a -> 'a) -> unit =
+  fun fld ->
+    fun f ->
+      let (gen, mydb, st) = !maindb in
+      let gen' = Int64.add gen 1L in
+      let otherfld = Stat.map_fld fld in
+      maindb :=
+        (gen', (fld.fset (f (fld.fget mydb)) mydb), (otherfld.fset gen' st))
+let add : 'a Rpc.Types.ref -> 'a -> unit =
+  fun ref ->
+    fun x ->
+      operate ref
+        (fun db_field ->
+           fun refmap_field ->
+             fld_update (Rpc.Types.compose db_field refmap_field)
+               (fun _ -> Some x))
+let remove : 'a Rpc.Types.ref -> unit =
+  fun ref ->
+    operate ref
+      (fun db_field ->
+         fun refmap_field ->
+           fld_update (Rpc.Types.compose db_field refmap_field)
+             (fun _ -> None))
+let update
+  : 'a Rpc.Types.ref -> ('b, 'a) Rpc.Types.field -> ('b -> 'b) -> unit =
+  fun ref ->
+    fun field ->
+      fun f ->
+        operate ref
+          (fun tablefield ->
+             fun objfield ->
+               let fld =
+                 Rpc.Types.opt_compose
+                   (Rpc.Types.compose tablefield objfield) field in
+               fld_update fld f)
+let get : 'a Rpc.Types.ref -> ('b, 'a) Rpc.Types.field -> 'b =
+  fun ref ->
+    fun field ->
+      operate ref
+        (fun tablefield ->
+           fun objfield ->
+             let fld =
+               let open Rpc.Types in
+                 opt_compose (compose tablefield objfield) field in
+             let (_, db, _) = !maindb in fld.fget db)
+let get_obj : 'a Rpc.Types.ref -> 'a option =
+  fun ref ->
+    operate ref
+      (fun tablefield ->
+         fun objfield ->
+           let fld = Rpc.Types.compose tablefield objfield in
+           let (_, db, _) = !maindb in fld.fget db)
+let eq_cls : type a b.
+  a Rpc.Types.cls -> b Rpc.Types.cls -> (a, b) Rpc.Types.eq option =
+  fun c1 ->
+    fun c2 ->
+      match (c1, c2) with
+      | (VM, VM) -> Some Eq
+      | (VBD, VBD) -> Some Eq
+      | (_, _) -> None
+let pr_cls : type a. a Rpc.Types.cls -> string =
+  fun x ->
+    match x with | VM -> "VM" | VBD -> "VBD" | DB -> "DB" | _ -> "Unknown"
+let setrel : type a b.
+  a Rpc.Types.ref -> (a, b) otm_pair -> b Rpc.Types.ref -> unit =
+  fun refo ->
+    fun (fieldo, fieldm) ->
+      fun refm ->
+        let before = get refo fieldo in
+        update refo fieldo (fun _ -> refm);
+        (try update before fieldm (List.filter (fun r -> r <> refo))
+         with | _ -> ());
+        (try update refm fieldm (fun x -> refo :: x) with | _ -> ())
+let set : type a b. a Rpc.Types.ref -> (b, a) Rpc.Types.field -> b -> unit =
+  fun ref ->
+    fun field ->
+      fun x ->
+        let is_rel =
+          List.fold_left
+            (fun acc ->
+               fun r ->
+                 match r with
+                 | Rel (f1, f2) ->
+                     (match let open Rpc.Types in
+                              eq_field { eq = eq_cls } field f1
+                      with
+                      | Some (Rpc.Types.Eq) -> (setrel ref (f1, f2) x; true)
+                      | _ -> acc)) false rels in
+        if not is_rel then update ref field (fun _ -> x)
+let add_to
+  : 'a Rpc.Types.ref ->
+      (('c * 'd) list, 'a) Rpc.Types.field -> 'c -> 'd -> unit
+  =
+  fun ref ->
+    fun field ->
+      fun k ->
+        fun v ->
+          update ref field (fun x -> (k, v) :: (List.remove_assoc k x))
+let rec marshal : type a. a Rpc.Types.typ -> a -> Rpc.t = Rpcmarshal.marshal
+let dump_db db = marshal typ_of_db db
+let dump_since g maindb =
+  let (new_gen, db, st) = maindb in
+  let update_acc : type a. (a, db) Rpc.Types.field -> Rpc.t -> Rpc.t =
+    fun fld ->
+      fun acc ->
+        let rec update_dict d p =
+          match (p, d) with
+          | ([], _) -> marshal fld.field (fld.fget db)
+          | (x::xs, Rpc.Dict dict) ->
+              let (cur, others) = List.partition (fun (x', _) -> x = x') dict in
+              let subdict =
+                match cur with
+                | [] -> Rpc.Dict []
+                | (_, r)::[] -> r
+                | _ -> failwith "Multiple bindings" in
+              let new_binding = update_dict subdict xs in
+              (match ((fld.field), new_binding) with
+               | (Rpc.Types.Option _, Rpc.Enum (y::[])) ->
+                   Rpc.Dict ((x, y) :: others)
+               | (Rpc.Types.Option _, Rpc.Enum []) -> Rpc.Dict others
+               | (_, e) -> Rpc.Dict ((x, e) :: others))
+          | (x::xs, _) -> failwith "Can't update non-dict with sub-fields" in
+        update_dict acc fld.fname in
+  (new_gen,
+    (Stat.StatTree.fold_over_recent g
+       (fun fld ->
+          fun acc ->
+            match fld with
+            | Stat.Fld f ->
+                (match f.fcls with | DB -> update_acc f acc | _ -> acc))
+       (Rpc.Dict []) st))
+let compare_db db1 db2 =
+  let db1' = (Rpcmarshal.marshal typ_of_db db1) |> Jsonrpc.to_string in
+  let db2' = (Rpcmarshal.marshal typ_of_db db2) |> Jsonrpc.to_string in
+  db1' = db2'
+let vm1 = mkref VM "vm1"
+let vm2 = mkref VM "vm2"
+let vbd1 = mkref VBD "vbd1"
+let unm rdb updates =
+  match Rpcmarshal.unmarshal_partial typ_of_db rdb updates with
+  | Ok x -> x
+  | Error (`Msg m) ->
+      failwith (Printf.sprintf "Failed to unmarshal_partial: %s" m)
+let _ =
+  let gen = 0L in
+  let remotedb = DB.empty in
+  let (gen, updates) = dump_since gen (!maindb) in
+  let remotedb = unm remotedb updates in
+  let (_, db, _) = !maindb in
+  Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+  add vm1 VM.empty;
+  Printf.printf "Here1\n%!";
+  (let (gen, updates) = dump_since gen (!maindb) in
+   let remotedb = unm remotedb updates in
+   let (_, db, _) = !maindb in
+   Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+   Printf.printf "Here2\n%!";
+   add vm2 VM.empty;
+   (let (gen, updates) = dump_since gen (!maindb) in
+    let remotedb = unm remotedb updates in
+    let (_, db, _) = !maindb in
+    Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+    Printf.printf "Here3\n%!";
+    add vbd1 VBD.empty;
+    (let (gen, updates) = dump_since gen (!maindb) in
+     let remotedb = unm remotedb updates in
+     let (_, db, _) = !maindb in
+     Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+     Printf.printf "Here4\n%!";
+     set vm1 VM.name_label "my new name";
+     (let (gen, updates) = dump_since gen (!maindb) in
+      Printf.printf "RPC: %s\n" (Jsonrpc.to_string updates);
+      (let remotedb = unm remotedb updates in
+       let (_, db, _) = !maindb in
+       Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+       Printf.printf "Here5\n%!";
+       add_to vm2 VM.other_config "key" "value";
+       (let (gen, updates) = dump_since gen (!maindb) in
+        let remotedb = unm remotedb updates in
+        let (_, db, _) = !maindb in
+        Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+        Printf.printf "Here6\n%!";
+        set vbd1 VBD.vM vm1;
+        (let (gen, updates) = dump_since gen (!maindb) in
+         Printf.printf "Rpc: %s\n%!" (Rpc.to_string updates);
+         (let remotedb = unm remotedb updates in
+          let (_, db, _) = !maindb in
+          Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+          Printf.printf "Here7\n%!";
+          (let (_, db, _) = !maindb in
+           Printf.printf "compare: %b\n%!" (compare_db remotedb db);
+           Printf.printf "local:  %s\n\n%!"
+             ((dump_db (getdb ())) |> Jsonrpc.to_string);
+           Printf.printf "remote: %s\n\n%!"
+             ((dump_db remotedb) |> Jsonrpc.to_string))))))))))
+File "db_rpc.ml", line 1:
+Error: Required module `Jsonrpc' is unavailable

@@ -1,0 +1,14 @@
+(alias
+ (name   runtest)
+ (deps   (:x db1.md))
+ (action (progn
+           (run ocaml-mdx test --direction=infer-timestamp %{x})
+           (diff? %{x} %{x}.corrected)
+)))
+(alias
+ (name   runtest)
+ (deps   (:x db2.md))
+ (action (progn
+           (run ocaml-mdx test --direction=infer-timestamp %{x})
+           (diff? %{x} %{x}.corrected)
+)))
